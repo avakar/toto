@@ -127,8 +127,8 @@ module Toto
           end
         elsif route.size == 2 && @config[:flatdirs].include?(route.first)
           context[flatarticle("#{route[1]}.#{self[:ext]}"), :article]
-        elsif respond_to?(path)
-          context[send(path, type), path.to_sym]
+        elsif respond_to?(route.first)
+          context[send(path, type), path.to_sym] rescue http 400
         elsif (repo = (@config[:github][:repos].select do |r| r.include?(path) end).first) &&
               !@config[:github][:user].empty?
           context[Repo.new(repo, @config), :repo]
