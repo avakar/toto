@@ -129,11 +129,11 @@ module Toto
           context[flatarticle("#{route[1]}.#{self[:ext]}"), :article]
         elsif respond_to?(path)
           context[send(path, type), path.to_sym]
-        elsif (repo = @config[:github][:repos].grep(/#{path}/).first) &&
+        elsif (repo = (@config[:github][:repos].select do |r| r.include?(path) end).first) &&
               !@config[:github][:user].empty?
           context[Repo.new(repo, @config), :repo]
         else
-          context[{}, path.to_sym]
+          context[{ :route => route }, route.first.to_sym]
         end
       else
         http 400
