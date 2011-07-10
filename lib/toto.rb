@@ -286,7 +286,11 @@ module Toto
     end
 
     def path
-      "/#{@config[:prefix]}#{self[:date].strftime("/%Y/%m/%d/#{slug}/")}".squeeze('/')
+      if @config[:flatdirs].empty?
+        "/#{@config[:prefix]}#{self[:date].strftime("/%Y/%m/%d/#{slug}/")}".squeeze('/')
+      else
+        "/#{@config[:prefix]}/#{@config[:flatdirs][0]}/#{slug}/".squeeze('/')
+      end
     end
 
     def title()   self[:title] || "an article"               end
