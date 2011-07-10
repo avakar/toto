@@ -93,6 +93,18 @@ module Toto
       Article.new("#{Paths[:articles]}/#{route.join('-')}.#{self[:ext]}", @config).load
     end
 
+    def flatarticle filter
+      entries = self.articles.select do |a|
+        File.basename(a)[11..-1] == filter
+      end
+
+      if entries.empty?
+        raise Errno::ENOENT
+      end
+
+      return Article.new(entries[0], @config).load
+    end
+
     def /
       self[:root]
     end
@@ -113,6 +125,8 @@ module Toto
               context[article(route), :article]
             else http 400
           end
+        elsif route.size == 2 && @config[:flatdirs].include?(route.first)
+          context[flatarticle("#{route[1]}.#{self[:ext]}"), :article]
         elsif respond_to?(path)
           context[send(path, type), path.to_sym]
         elsif (repo = @config[:github][:repos].grep(/#{path}/).first) &&
@@ -296,6 +310,8 @@ module Toto
       :ext => 'txt',                                        # extension for articles
       :cache => 28800,                                      # cache duration (seconds)
       :github => {:user => "", :repos => [], :ext => 'md'}, # Github username and list of repos
+      :flatdirs => ['blog'],                                # List of path prefixes that contain
+                                                            # a flat list of all articles
       :to_html => lambda {|path, page, ctx|                 # returns an html, from a path & context
         ERB.new(File.read("#{path}/#{page}.rhtml")).result(ctx)
       },
